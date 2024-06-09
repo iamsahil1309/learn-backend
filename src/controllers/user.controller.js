@@ -6,7 +6,6 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 const registerUser = asyncHandler(async( req, res ) => {
     const{fullname, username, email, password} = req.body
-    console.log("email : "  , email)
 
     // validation
     if( [fullname, email, username, password].some((field)=> field?.trim() === "")){
@@ -14,7 +13,7 @@ const registerUser = asyncHandler(async( req, res ) => {
     }
 
     //check is user or email exist or not
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or : [{username}, {email}]
     })
 
@@ -24,7 +23,11 @@ const registerUser = asyncHandler(async( req, res ) => {
 
     // handle files
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+   
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     // check avatar
     if(!avatarLocalPath){
